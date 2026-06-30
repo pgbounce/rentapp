@@ -1,0 +1,22 @@
+{
+  "name": "toprent-beta",
+  "private": true,
+  "packageManager": "pnpm@10.12.4",
+  "scripts": {
+    "dev": "turbo dev --filter=@toprent/web --filter=@toprent/api",
+    "dev:worker": "turbo dev --filter=@toprent/worker",
+    "dev:web": "turbo dev --filter=@toprent/web",
+    "dev:api": "turbo dev --filter=@toprent/api",
+    "build": "turbo build",
+    "typecheck": "turbo typecheck",
+    "infra:up": "docker compose -f infra/docker/compose.yml up -d",
+    "infra:down": "docker compose -f infra/docker/compose.yml down",
+    "infra:logs": "docker compose -f infra/docker/compose.yml logs -f"
+  },
+  "devDependencies": {
+    "@types/node": "^26.0.1",
+    "pnpm": "10.12.4",
+    "turbo": "^2.10.0",
+    "typescript": "^6.0.3"
+  }
+}
