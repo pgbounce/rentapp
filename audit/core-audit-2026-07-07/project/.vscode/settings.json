@@ -1,0 +1,16 @@
+{
+  "files.watcherExclude": {
+    "**/.next/**": true,
+    "**/.pnpm-store/**": true,
+    "**/.turbo/**": true,
+    "**/dist/**": true,
+    "**/node_modules/**": true
+  },
+  "search.exclude": {
+    "**/.next": true,
+    "**/.pnpm-store": true,
+    "**/.turbo": true,
+    "**/dist": true,
+    "**/node_modules": true
+  }
+}
