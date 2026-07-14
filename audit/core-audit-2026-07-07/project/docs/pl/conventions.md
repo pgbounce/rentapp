@@ -58,6 +58,8 @@
 - nigdy nie cache'uj live write scope między requestami
 - live scope musi rozwiązywać się względem docelowego tenanta i partnera, a nie tylko `userId`
 - zapisy platformy mogą nieść docelowy kontekst tenanta lub partnera dla audytu i scope sesji, mimo że uprawnienia platformy pozostają globalne
+- `runWriteAction` dowodzi scope aktora, a nie serializuje zapisów całego tenanta
+- jeśli funkcja potrzebuje serializacji na poziomie tenanta albo zasobu, musi jawnie zablokować ten zasób we własnej transakcji
 - RLS jest właścicielem izolacji tenantów i partnerów, a nie filtry frontendowe ani przypadkowe `if` w kodzie
 - wewnętrzny core używa stałych profili: `platform`, `tenant`, `partner`
 - rekordy partnerów i partnerowe membershipy są domyślnie zarządzane przez `platform`

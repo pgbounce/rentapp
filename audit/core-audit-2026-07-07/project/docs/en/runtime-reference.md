@@ -85,6 +85,13 @@ Use it for:
 - runs the callback
 - commits or rolls back
 
+Important current rules:
+
+- `runInTransaction()` uses plain `begin`, so write transactions currently run at PostgreSQL's default `READ COMMITTED` isolation level
+- `runWriteAction()` locks only `users` and `memberships` while it proves the actor scope
+- `runWriteAction()` does not serialize writes per tenant or per partner
+- if a future feature needs tenant-level or resource-level serialization, that feature must take its own explicit lock inside the business transaction
+
 Use it for:
 
 - writes
@@ -183,7 +190,12 @@ It is important because it:
 - checks fresh state directly in PostgreSQL
 - verifies active user, membership, tenant, and partner state
 - uses `SECURITY DEFINER` so it can safely read access tables before the final write scope is set
-- uses `FOR UPDATE` so the permission proof is not changed mid-write by another transaction
+- uses `FOR UPDATE` on `users` and `memberships` so the permission proof is not changed mid-write by another transaction
+
+Important limit:
+
+- this lock is about actor state, not tenant-wide write serialization
+- tenant and partner rows are checked for active status, but they are not locked by `runWriteAction()`
 
 ## Priority inside write resolution
 

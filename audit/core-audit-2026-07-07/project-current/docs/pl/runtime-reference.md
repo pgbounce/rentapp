@@ -85,6 +85,13 @@ Używamy go do:
 - uruchamia callback
 - robi commit albo rollback
 
+Ważne obecne zasady:
+
+- `runInTransaction()` używa zwykłego `begin`, więc transakcje zapisu działają dziś na domyślnym poziomie izolacji PostgreSQL `READ COMMITTED`
+- `runWriteAction()` blokuje podczas dowodu scope tylko `users` i `memberships`
+- `runWriteAction()` nie serializuje zapisów per tenant ani per partner
+- jeśli przyszła funkcja potrzebuje serializacji na poziomie tenanta albo zasobu, musi wziąć własny jawny lock wewnątrz transakcji biznesowej
+
 Używamy go do:
 
 - zapisów
@@ -183,7 +190,12 @@ Jest ważna, bo:
 - sprawdza świeży stan bezpośrednio w PostgreSQL
 - weryfikuje aktywność użytkownika, membershipu, tenanta i partnera
 - używa `SECURITY DEFINER`, żeby bezpiecznie odczytać tabele dostępowe zanim ustawi się finalny write scope
-- używa `FOR UPDATE`, żeby dowód uprawnień nie zmienił się w trakcie zapisu przez inną transakcję
+- używa `FOR UPDATE` na `users` i `memberships`, żeby dowód uprawnień nie zmienił się w trakcie zapisu przez inną transakcję
+
+Ważne ograniczenie:
+
+- ten lock dotyczy stanu aktora, a nie serializacji zapisów całego tenanta
+- wiersze `tenant` i `partner` są sprawdzane pod kątem aktywności, ale `runWriteAction()` ich nie blokuje
 
 ## Priorytet rozwiązywania write scope
 

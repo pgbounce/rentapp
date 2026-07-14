@@ -92,6 +92,8 @@ To utrzymuje core w prostocie:
 - obecnym wejściem write path jest `DbService.runWriteAction`
 - `runWriteAction` rozwiązuje aktora wewnętrznego na żywo z PostgreSQL wewnątrz transakcji zapisu
 - `runWriteAction` oczekuje `userId` wyłącznie z zaufanego stanu auth, nigdy z body, query ani parametrów trasy podanych przez wywołującego
+- `runWriteAction` nie jest globalnym muteksem zapisów per tenant ani per partner
+- funkcje, które potrzebują serializacji na poziomie tenanta albo zasobu, muszą brać własne jawne locki wewnątrz transakcji biznesowej
 - przyszłe publiczne funkcje odczytu potrzebują własnej polityki RLS scoped po `tenant_id`
 - przyszłe publiczne funkcje odczytu potrzebują też jawnej bezpiecznej listy kolumn w warstwie zapytań
 

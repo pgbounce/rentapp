@@ -60,6 +60,8 @@ Use it when:
 
 `DbService.runWriteAction()` does not trust the request snapshot. It asks PostgreSQL again whether the user is still active and still has the right role in the requested tenant or partner scope.
 
+It does not act as a tenant-wide write queue. It only proves the actor state. If a future feature needs true serialization for one tenant, one partner, or one business resource, that feature must take its own explicit lock inside the write transaction.
+
 Use it when:
 
 - the operation writes data

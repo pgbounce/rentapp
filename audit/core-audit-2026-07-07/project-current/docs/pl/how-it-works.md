@@ -60,6 +60,8 @@ Używamy go wtedy, gdy:
 
 `DbService.runWriteAction()` nie ufa snapshotowi requestu. Jeszcze raz pyta PostgreSQL, czy użytkownik nadal jest aktywny i nadal ma właściwą rolę w żądanym tenant albo partner scope.
 
+Nie działa jak globalna kolejka zapisów dla całego tenanta. Dowodzi tylko stan aktora. Jeśli przyszła funkcja będzie potrzebowała prawdziwej serializacji dla jednego tenanta, jednego partnera albo konkretnego zasobu biznesowego, musi sama wziąć jawny lock wewnątrz transakcji zapisu.
+
 Używamy go wtedy, gdy:
 
 - operacja zapisuje dane

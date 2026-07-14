@@ -92,6 +92,8 @@ This keeps the core simple:
 - the current write entrypoint is `DbService.runWriteAction`
 - `runWriteAction` resolves the internal actor live from PostgreSQL inside the write transaction
 - `runWriteAction` expects `userId` from trusted auth state only, never from request body, query string, or route params supplied by the caller
+- `runWriteAction` is not a tenant-wide or partner-wide write mutex
+- features that need tenant-level or resource-level serialization must take their own explicit locks inside the business transaction
 - future public read features need their own RLS policy scoped by `tenant_id`
 - future public read features also need an explicit safe column list in the query layer
 
