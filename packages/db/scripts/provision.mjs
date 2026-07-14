@@ -1,5 +1,6 @@
 import pg from "pg";
 import {
+  ensureAdminRoleCanBypassRls,
   quoteIdentifier,
   quoteLiteral,
   readAdminConnectionString,
@@ -27,6 +28,7 @@ async function main() {
   await client.connect();
 
   try {
+    await ensureAdminRoleCanBypassRls(client);
     await client.query(`
       do $$
       begin

@@ -1,4 +1,6 @@
+import { sql } from "drizzle-orm";
 import {
+  check,
   index,
   pgEnum,
   pgTable,
@@ -34,5 +36,9 @@ export const locations = pgTable(
     index("locations_tenant_id_idx").on(table.tenantId),
     uniqueIndex("locations_tenant_slug_unique").on(table.tenantId, table.slug),
     uniqueIndex("locations_tenant_id_id_unique").on(table.tenantId, table.id),
+    check(
+      "locations_slug_format_check",
+      sql`"slug" ~ '^[a-z0-9]+(?:-[a-z0-9]+)*$'`,
+    ),
   ],
 );

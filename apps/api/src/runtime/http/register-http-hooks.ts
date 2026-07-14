@@ -1,9 +1,11 @@
 import { randomUUID } from "node:crypto";
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
+import { apiConfig } from "../../config/api.config";
 import type { DbService } from "../../infrastructure/db/db.service";
 import type { AppLogger } from "../logging/app-logger";
 import { createSystemRequestContext } from "../request/request-context";
 import type { RequestContextStore } from "../request/request-context-store";
+import { resolveRequestMode } from "../request/request-mode-resolver";
 import { resolveRequestContext } from "../request/tenant-resolver";
 
 export function registerHttpHooks(
@@ -24,7 +26,9 @@ export function registerHttpHooks(
         typeof requestIdHeader === "string" && requestIdHeader.length > 0
           ? requestIdHeader
           : randomUUID();
+      const requestMode = resolveRequestMode(request.url, apiConfig.apiPrefix);
       request.requestStartedAt = Date.now();
+      request.requestMode = requestMode;
       reply.header("x-request-id", requestId);
       request.requestContext = createSystemRequestContext(requestId);
 
@@ -33,6 +37,7 @@ export function registerHttpHooks(
           const requestContext = await resolveRequestContext(
             requestId,
             request,
+            requestMode,
             dbService,
           );
 
@@ -56,7 +61,7 @@ export function registerHttpHooks(
         method: request.method,
         path: request.url,
         requestId: request.requestContext.requestId,
-        requestMode: request.requestContext.requestMode,
+        requestMode: request.requestMode,
         statusCode: reply.statusCode,
         durationMs: Date.now() - request.requestStartedAt,
       });

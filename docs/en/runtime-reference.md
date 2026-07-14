@@ -39,6 +39,7 @@ Rules:
 - tenant is resolved from `request.hostname`
 - the code uses host-derived runtime data, not raw `x-forwarded-host`
 - if tenant resolution fails, the request stops with `404`
+- tenant resolution depends on a `SECURITY DEFINER` SQL helper owned by the admin-side migration role
 
 ### `internal`
 
@@ -82,6 +83,7 @@ Use it for:
 - calls `app.resolve_internal_write_actor(userId, targetTenantId, targetPartnerId)`
 - builds a fresh internal actor snapshot from the returned row
 - sets SQL session scope from that fresh result
+- exposes `db.expectMutation(...)` inside the callback for writes that must affect an exact number of rows
 - runs the callback
 - commits or rolls back
 
@@ -120,15 +122,15 @@ If a non-HTTP exception escapes:
 
 - `HttpExceptionFilter` returns `500`
 - API keeps one consistent error shape
+- server logs keep the raw internal error name, message, and stack
 
-### Deferred gap
+### Write invariant mismatch
 
-Today there is still no shared helper that raises an explicit alarm when:
+If a write callback uses `db.expectMutation(...)` and the query affects the wrong number of rows:
 
-- app-level write checks pass
-- but table-level RLS later causes an unexpected zero-row write
-
-That is still intentionally deferred.
+- backend logs `db.write_invariant_failed`
+- the request fails as `500`
+- this is treated as a backend bug or RLS mismatch, not as a normal business result
 
 ## Actor model
 
@@ -190,6 +192,7 @@ It is important because it:
 - checks fresh state directly in PostgreSQL
 - verifies active user, membership, tenant, and partner state
 - uses `SECURITY DEFINER` so it can safely read access tables before the final write scope is set
+- works only if the role that owns that SQL function can bypass RLS with `SUPERUSER` or `BYPASSRLS`
 - uses `FOR UPDATE` on `users` and `memberships` so the permission proof is not changed mid-write by another transaction
 
 Important limit:

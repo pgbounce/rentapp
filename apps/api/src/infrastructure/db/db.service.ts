@@ -17,6 +17,7 @@ import {
   createDbSessionScope,
 } from "@toprent/db";
 import { apiConfig } from "../../config/api.config";
+import { AppLogger } from "../../runtime/logging/app-logger";
 import { readRequestActorSnapshot } from "../../runtime/request/request-context";
 import { RequestContextStore } from "../../runtime/request/request-context-store";
 
@@ -35,9 +36,24 @@ interface ResolveInternalWriteActorRow {
 
 type DbTransactionClient = Parameters<typeof applyDbSessionScope>[0];
 
+interface MutationResultLike {
+  rowCount: number | null;
+}
+
+type WriteDb = ReturnType<typeof createDb> & {
+  expectMutation<T extends MutationResultLike>(
+    result: T,
+    operation: string,
+    expectedRowCount?: number,
+  ): T;
+};
+
 @Injectable()
 export class DbService implements OnModuleDestroy {
   private readonly pool = createDbPool(apiConfig.databaseUrl);
+
+  @Inject(AppLogger)
+  private readonly logger!: AppLogger;
 
   @Inject(RequestContextStore)
   private readonly requestContextStore!: RequestContextStore;
@@ -57,7 +73,7 @@ export class DbService implements OnModuleDestroy {
 
   async runWriteAction<T>(
     params: ResolveInternalWriteActorParams,
-    run: (db: ReturnType<typeof createDb>) => Promise<T>,
+    run: (db: WriteDb) => Promise<T>,
   ) {
     return this.withClient((client) =>
       this.runInTransaction(client, async () => {
@@ -71,7 +87,7 @@ export class DbService implements OnModuleDestroy {
         }
 
         await applyDbSessionScope(client, scope);
-        return run(createDb(client));
+        return run(this.createWriteDb(client));
       }),
     );
   }
@@ -160,6 +176,43 @@ export class DbService implements OnModuleDestroy {
         throw new Error(`Unsupported actor role: ${unsupportedRole}`);
       }
     }
+  }
+
+  private createWriteDb(client: DbTransactionClient): WriteDb {
+    const db = createDb(client);
+
+    return Object.assign(db, {
+      expectMutation: <T extends MutationResultLike>(
+        result: T,
+        operation: string,
+        expectedRowCount = 1,
+      ) => {
+        this.assertMutation(result, operation, expectedRowCount);
+        return result;
+      },
+    });
+  }
+
+  private assertMutation(
+    result: MutationResultLike,
+    operation: string,
+    expectedRowCount: number,
+  ) {
+    const actualRowCount = result.rowCount;
+
+    if (actualRowCount === expectedRowCount) {
+      return;
+    }
+
+    this.logger.error("db.write_invariant_failed", {
+      operation,
+      expectedRowCount,
+      actualRowCount,
+    });
+
+    throw new Error(
+      `Write invariant failed for "${operation}": expected ${expectedRowCount} affected row(s), got ${actualRowCount ?? "null"}.`,
+    );
   }
 
   private async runInTransaction<T>(

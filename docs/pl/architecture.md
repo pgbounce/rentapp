@@ -103,7 +103,7 @@ To utrzymuje core w prostocie:
 - auth klienta nie jest jeszcze zaimplementowany, więc aktorzy `customer` są na razie tylko przygotowaniem foundation
 - publiczny katalog i publiczny listing RLS nie są jeszcze zaimplementowane
 - tabele klientów, kody logowania, sesje i endpointy klienta nie są jeszcze zaimplementowane
-- `runWriteAction` gwarantuje dziś tylko świeże rozwiązanie aktora i scope transakcji
+- `runWriteAction` gwarantuje dziś świeże rozwiązanie aktora, scope transakcji i wspólny helper `expectMutation(...)` do ścisłego pilnowania liczby zmienionych wierszy
 - feature-level writes nadal będą musiały walidować swój docelowy zasób wewnątrz transakcji
 - obecne publiczne rozpoznawanie tenanta wspiera subdomenę hosta do `tenants.slug`; custom domains można dodać później jako osobny krok foundation
 - obecny runtime ufa tylko bezpośrednio rozpoznanemu hostowi serwera; jeśli później pojawi się reverse proxy, zaufanie do proxy trzeba będzie skonfigurować jawnie, zanim zaczniemy używać forwarded headers

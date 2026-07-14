@@ -7,6 +7,16 @@ Te zasady obowiązują jeszcze przed pierwszą tabelą.
 - wszystkie główne rekordy biznesowe będą używały `uuid`
 - frontend nigdy nie wyznacza prawdy o identyfikatorach
 
+## Publiczne identyfikatory
+
+- slugi zapisane w bazie powinny być małymi literami i nadawać się do URL
+- publiczne identyfikatory nie powinny polegać na dopasowaniu zależnym od wielkości liter
+
+## E-mail
+
+- e-maile użytkowników wewnętrznych powinny być zapisywane już po normalizacji
+- obecny core trzyma je małymi literami i bez zbędnych spacji
+
 ## Czas
 
 - czas zapisujemy w UTC

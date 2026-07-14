@@ -103,7 +103,7 @@ This keeps the core simple:
 - customer auth is not implemented yet, so customer actors are foundation-only for now
 - public catalog and public listing RLS are not implemented yet
 - customer tables, login codes, sessions, and customer endpoints are not implemented yet
-- `runWriteAction` currently guarantees only fresh actor resolution and transaction scope
+- `runWriteAction` already guarantees fresh actor resolution, transaction scope, and a shared `expectMutation(...)` helper for strict row-count checks
 - feature-level writes must still validate their target resource inside the transaction
 - current public tenant resolution supports host subdomain to `tenants.slug`; custom domains can be added later as a separate foundation step
 - current runtime trusts only direct server host resolution; if a reverse proxy is introduced later, proxy trust must be configured explicitly before forwarded headers are used anywhere

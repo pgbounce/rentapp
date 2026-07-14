@@ -7,6 +7,16 @@ These rules apply before the first business table is added.
 - all main business records should use `uuid`
 - the frontend must never define identifier truth
 
+## Public identifiers
+
+- slugs stored in the database should be lowercase and URL-safe
+- public identifiers should not rely on case-sensitive matching
+
+## Email
+
+- internal user emails should be stored already normalized
+- the current core keeps them lowercase and trimmed
+
 ## Time
 
 - store time in UTC

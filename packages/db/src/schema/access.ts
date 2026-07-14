@@ -42,7 +42,13 @@ export const users = pgTable(
     status: userStatusEnum("status").notNull().default("invited"),
     ...timestamps(),
   },
-  (table) => [uniqueIndex("users_email_unique").on(table.email)],
+  (table) => [
+    uniqueIndex("users_email_unique").on(table.email),
+    check(
+      "users_email_normalized_check",
+      sql`"email" <> '' and "email" = lower(btrim("email")) and "email" !~ E'\\s'`,
+    ),
+  ],
 );
 
 export const userCredentials = pgTable("user_credentials", {

@@ -32,12 +32,12 @@ function readAdminConnectionUrl() {
   );
 }
 
-function readRoleName(url) {
+function readRoleName(url, envName) {
   const roleName = decodeURIComponent(url.username);
 
   if (!roleNamePattern.test(roleName)) {
     throw new Error(
-      "DATABASE_URL must use a PostgreSQL role name matching [A-Za-z_][A-Za-z0-9_]*",
+      `${envName} must use a PostgreSQL role name matching [A-Za-z_][A-Za-z0-9_]*`,
     );
   }
 
@@ -69,14 +69,38 @@ export function readAdminConnectionString() {
 }
 
 export function readAdminRoleName() {
-  return readRoleName(readAdminConnectionUrl());
+  return readRoleName(readAdminConnectionUrl(), "DATABASE_ADMIN_URL");
+}
+
+export async function ensureAdminRoleCanBypassRls(client) {
+  const result = await client.query(`
+    select
+      current_user as role_name,
+      rolsuper,
+      rolbypassrls
+    from pg_roles
+    where rolname = current_user
+  `);
+  const row = result.rows[0];
+
+  if (!row) {
+    throw new Error("Could not resolve the current PostgreSQL admin role");
+  }
+
+  if (row.rolsuper || row.rolbypassrls) {
+    return;
+  }
+
+  throw new Error(
+    `DATABASE_ADMIN_URL must connect as a role with SUPERUSER or BYPASSRLS. Current role "${row.role_name}" cannot own SECURITY DEFINER functions that must read FORCE RLS tables before session scope exists.`,
+  );
 }
 
 export function readRuntimeRoleConfig() {
   const url = readRuntimeConnectionUrl();
 
   return {
-    roleName: readRoleName(url),
+    roleName: readRoleName(url, "DATABASE_URL"),
     password: readPassword(url),
     databaseName: readDatabaseName(url),
   };

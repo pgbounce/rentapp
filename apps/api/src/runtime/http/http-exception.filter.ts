@@ -2,6 +2,7 @@ import {
   type ArgumentsHost,
   Catch,
   type ExceptionFilter,
+  HttpException,
   Inject,
   Injectable,
 } from "@nestjs/common";
@@ -23,15 +24,25 @@ export class HttpExceptionFilter implements ExceptionFilter {
       request.requestContext?.requestId ??
       String(reply.getHeader("x-request-id") ?? "unknown");
     const { statusCode, body } = formatApiError(error, requestId);
+    const rawErrorDetails =
+      error instanceof Error && !(error instanceof HttpException)
+        ? {
+            rawErrorName: error.name,
+            rawErrorMessage: error.message,
+            rawErrorStack: error.stack,
+          }
+        : {};
 
     this.logger.error("http.error", {
       method: request.method,
       path: request.url,
       requestId,
-      requestMode: request.requestContext?.requestMode ?? "system",
+      requestMode: request.requestMode ?? request.requestContext?.requestMode,
       statusCode,
       errorCode: body.error.code,
       message: body.error.message,
+      isHttpException: error instanceof HttpException,
+      ...rawErrorDetails,
     });
 
     reply.status(statusCode).send(body);

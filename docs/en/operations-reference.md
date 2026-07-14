@@ -37,7 +37,18 @@ Used by:
 - `pnpm db:migrate`
 - admin-side smoke seeding in write-path tests
 
-This role is assumed to already exist and have broad schema-management permissions.
+This role must already exist and must be able to bypass RLS:
+
+- `SUPERUSER`, or
+- `BYPASSRLS`
+
+Why:
+
+- migrations create `SECURITY DEFINER` functions
+- those functions must read tables protected by `FORCE ROW LEVEL SECURITY`
+- that happens before request session scope exists
+
+The scripts now fail early if `DATABASE_ADMIN_URL` uses a role that cannot do this.
 
 ### `app`
 
@@ -72,6 +83,7 @@ If runtime connected as admin instead of app, the security model would lose its 
 ### What `pnpm db:provision` does
 
 - reads admin and runtime connection strings
+- verifies that the connected admin role has `SUPERUSER` or `BYPASSRLS`
 - extracts runtime role name, password, and database name
 - creates or updates the runtime role
 - sets safe role flags
@@ -81,6 +93,7 @@ If runtime connected as admin instead of app, the security model would lose its 
 ### What `pnpm db:migrate` does
 
 - connects through admin URL
+- verifies that the connected admin role has `SUPERUSER` or `BYPASSRLS`
 - checks that runtime role exists
 - ensures `app_migrations` exists
 - reads SQL migrations in order

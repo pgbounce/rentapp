@@ -60,6 +60,7 @@
 - platform writes may carry a target tenant or partner context for audit and session scoping, even though platform permissions remain global
 - `runWriteAction` proves actor scope, not tenant-wide serialization
 - if a feature needs tenant-level or resource-level serialization, it must lock that resource explicitly inside its own transaction
+- write callbacks that expect a strict row count should use `db.expectMutation(...)` instead of silently accepting `0` affected rows
 - RLS owns tenant and partner isolation, not frontend filters or ad hoc `if` checks
 - internal core uses fixed profiles: `platform`, `tenant`, `partner`
 - partner records and partner-scoped memberships are platform-managed by default

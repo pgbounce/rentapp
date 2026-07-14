@@ -37,7 +37,18 @@ Używana przez:
 - `pnpm db:migrate`
 - seedowanie po stronie admina w smoke teście write path
 
-Zakładamy, że ta rola już istnieje i ma szerokie uprawnienia do zarządzania schematem.
+Ta rola musi już istnieć i musi umieć ominąć RLS:
+
+- `SUPERUSER`, albo
+- `BYPASSRLS`
+
+Dlaczego:
+
+- migracje tworzą funkcje `SECURITY DEFINER`
+- te funkcje muszą czytać tabele chronione przez `FORCE ROW LEVEL SECURITY`
+- dzieje się to jeszcze zanim powstanie session scope requestu
+
+Skrypty zatrzymują się teraz od razu, jeśli `DATABASE_ADMIN_URL` używa roli, która tego nie potrafi.
 
 ### `app`
 
@@ -72,6 +83,7 @@ Gdyby runtime łączył się jako admin zamiast jako app, model bezpieczeństwa 
 ### Co robi `pnpm db:provision`
 
 - czyta admin i runtime connection string
+- sprawdza, czy podłączona rola admin ma `SUPERUSER` albo `BYPASSRLS`
 - wyciąga nazwę roli runtime, hasło i nazwę bazy
 - tworzy albo aktualizuje rolę runtime
 - ustawia bezpieczne flagi roli
@@ -81,6 +93,7 @@ Gdyby runtime łączył się jako admin zamiast jako app, model bezpieczeństwa 
 ### Co robi `pnpm db:migrate`
 
 - łączy się przez admin URL
+- sprawdza, czy podłączona rola admin ma `SUPERUSER` albo `BYPASSRLS`
 - sprawdza, czy rola runtime istnieje
 - pilnuje istnienia `app_migrations`
 - czyta migracje SQL po kolei

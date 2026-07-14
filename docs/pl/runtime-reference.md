@@ -39,6 +39,7 @@ Zasady:
 - tenant jest rozpoznawany z `request.hostname`
 - kod używa danych hosta rozpoznanych przez runtime, a nie surowego `x-forwarded-host`
 - jeśli tenant nie zostanie rozpoznany, request kończy się `404`
+- rozpoznanie tenant opiera się na helperze SQL `SECURITY DEFINER`, którego właścicielem jest rola używana przez migracje
 
 ### `internal`
 
@@ -82,6 +83,7 @@ Używamy go do:
 - woła `app.resolve_internal_write_actor(userId, targetTenantId, targetPartnerId)`
 - buduje świeży snapshot aktora wewnętrznego z wiersza zwróconego przez bazę
 - ustawia SQL session scope z tego świeżego wyniku
+- wystawia w callbacku `db.expectMutation(...)` dla zapisów, które muszą zmienić dokładnie określoną liczbę wierszy
 - uruchamia callback
 - robi commit albo rollback
 
@@ -120,15 +122,15 @@ Jeśli ucieknie zwykły wyjątek:
 
 - `HttpExceptionFilter` zwraca `500`
 - API zachowuje jeden spójny format błędu
+- logi serwera zachowują surową nazwę błędu, wiadomość i stack
 
-### Odłożona luka
+### Rozjazd inwariantu zapisu
 
-Dziś nadal nie ma wspólnego helpera, który podnosiłby osobny alarm, gdy:
+Jeśli callback zapisu użyje `db.expectMutation(...)`, a zapytanie zmieni złą liczbę wierszy:
 
-- app-level write checks przejdą
-- ale table-level RLS później spowoduje nieoczekiwany zapis na `0` wierszy
-
-To jest nadal świadomie odłożone.
+- backend loguje `db.write_invariant_failed`
+- request kończy się jako `500`
+- traktujemy to jako błąd backendu albo rozjazd z RLS, a nie zwykły wynik biznesowy
 
 ## Model aktora
 
@@ -190,6 +192,7 @@ Jest ważna, bo:
 - sprawdza świeży stan bezpośrednio w PostgreSQL
 - weryfikuje aktywność użytkownika, membershipu, tenanta i partnera
 - używa `SECURITY DEFINER`, żeby bezpiecznie odczytać tabele dostępowe zanim ustawi się finalny write scope
+- działa poprawnie tylko wtedy, gdy rola będąca właścicielem tej funkcji może ominąć RLS przez `SUPERUSER` albo `BYPASSRLS`
 - używa `FOR UPDATE` na `users` i `memberships`, żeby dowód uprawnień nie zmienił się w trakcie zapisu przez inną transakcję
 
 Ważne ograniczenie:

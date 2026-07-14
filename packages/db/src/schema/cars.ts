@@ -63,6 +63,7 @@ export const cars = pgTable(
     index("cars_tenant_partner_id_idx").on(table.tenantId, table.partnerId),
     uniqueIndex("cars_tenant_slug_unique").on(table.tenantId, table.slug),
     uniqueIndex("cars_tenant_id_id_unique").on(table.tenantId, table.id),
+    check("cars_slug_format_check", sql`"slug" ~ '^[a-z0-9]+(?:-[a-z0-9]+)*$'`),
     check(
       "cars_production_year_check",
       sql`"production_year" between 1886 and 2100`,

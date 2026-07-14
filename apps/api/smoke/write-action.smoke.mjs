@@ -237,16 +237,19 @@ test("runWriteAction resolves a fresh internal write scope", async (t) => {
         targetPartnerId: null,
       },
       async (db) => {
-        const result = await db.$client.query(
-          `insert into partners (id, tenant_id, slug, name, status)
-           values ($1, $2, $3, $4, 'active')
-           returning id`,
-          [
-            platformCreatedPartnerId,
-            tenantId,
-            `platform-created-${suffix}`,
-            `Platform Created ${suffix}`,
-          ],
+        const result = db.expectMutation(
+          await db.$client.query(
+            `insert into partners (id, tenant_id, slug, name, status)
+             values ($1, $2, $3, $4, 'active')
+             returning id`,
+            [
+              platformCreatedPartnerId,
+              tenantId,
+              `platform-created-${suffix}`,
+              `Platform Created ${suffix}`,
+            ],
+          ),
+          "insert platform partner",
         );
 
         return result.rows[0]?.id ?? null;
@@ -288,10 +291,13 @@ test("runWriteAction resolves a fresh internal write scope", async (t) => {
         targetPartnerId: null,
       },
       async (db) => {
-        await db.$client.query(
-          `insert into memberships (user_id, tenant_id, partner_id, scope, role, status)
-           values ($1, $2, null, 'tenant', 'tenant', 'invited')`,
-          [tenantManagedUserId, tenantId],
+        db.expectMutation(
+          await db.$client.query(
+            `insert into memberships (user_id, tenant_id, partner_id, scope, role, status)
+             values ($1, $2, null, 'tenant', 'tenant', 'invited')`,
+            [tenantManagedUserId, tenantId],
+          ),
+          "insert tenant membership",
         );
       },
     );
@@ -324,12 +330,42 @@ test("runWriteAction resolves a fresh internal write scope", async (t) => {
         targetPartnerId: partnerId,
       },
       async (db) => {
-        await db.$client.query(
-          `insert into memberships (user_id, tenant_id, partner_id, scope, role, status)
-           values ($1, $2, $3, 'partner', 'partner', 'invited')`,
-          [platformManagedPartnerUserId, tenantId, partnerId],
+        db.expectMutation(
+          await db.$client.query(
+            `insert into memberships (user_id, tenant_id, partner_id, scope, role, status)
+             values ($1, $2, $3, 'partner', 'partner', 'invited')`,
+            [platformManagedPartnerUserId, tenantId, partnerId],
+          ),
+          "insert partner membership as platform",
         );
       },
+    );
+
+    await assert.rejects(
+      () =>
+        dbService.runWriteAction(
+          {
+            userId: platformUserId,
+            targetTenantId: tenantId,
+            targetPartnerId: null,
+          },
+          async (db) => {
+            db.expectMutation(
+              await db.$client.query(
+                `update partners
+                 set name = name
+                 where tenant_id = $1
+                   and id = $2
+                   and false`,
+                [tenantId, partnerId],
+              ),
+              "noop partner update",
+            );
+          },
+        ),
+      (error) =>
+        error instanceof Error &&
+        /Write invariant failed for "noop partner update"/.test(error.message),
     );
 
     await assert.rejects(

@@ -3,6 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import pg from "pg";
 import {
+  ensureAdminRoleCanBypassRls,
   quoteIdentifier,
   readAdminConnectionString,
   readAdminRoleName,
@@ -71,6 +72,7 @@ async function main() {
   await client.connect();
 
   try {
+    await ensureAdminRoleCanBypassRls(client);
     await ensureRuntimeRoleExists(client, roleName);
     await ensureMigrationsTable(client);
 

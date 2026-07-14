@@ -1,15 +1,14 @@
 import { isIP } from "node:net";
 import { NotFoundException } from "@nestjs/common";
 import type { FastifyRequest } from "fastify";
-import { apiConfig } from "../../config/api.config";
 import type { DbService } from "../../infrastructure/db/db.service";
 import {
   type RequestContextValue,
+  type RequestMode,
   createInternalRequestContext,
   createPublicRequestContext,
   createSystemRequestContext,
 } from "./request-context";
-import { resolveRequestMode } from "./request-mode-resolver";
 
 export function extractTenantSlug(request: Pick<FastifyRequest, "hostname">) {
   if (typeof request.hostname !== "string" || request.hostname.length === 0) {
@@ -41,10 +40,9 @@ function createTenantNotFoundError() {
 export async function resolveRequestContext(
   requestId: string,
   request: FastifyRequest,
+  requestMode: RequestMode,
   dbService: DbService,
 ): Promise<RequestContextValue> {
-  const requestMode = resolveRequestMode(request.url, apiConfig.apiPrefix);
-
   if (requestMode === "system") {
     return createSystemRequestContext(requestId);
   }

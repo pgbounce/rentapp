@@ -1,4 +1,6 @@
+import { sql } from "drizzle-orm";
 import {
+  check,
   index,
   pgEnum,
   pgTable,
@@ -25,7 +27,13 @@ export const tenants = pgTable(
     status: tenantStatusEnum("status").notNull().default("active"),
     ...timestamps(),
   },
-  (table) => [uniqueIndex("tenants_slug_unique").on(table.slug)],
+  (table) => [
+    uniqueIndex("tenants_slug_unique").on(table.slug),
+    check(
+      "tenants_slug_format_check",
+      sql`"slug" ~ '^[a-z0-9]+(?:-[a-z0-9]+)*$'`,
+    ),
+  ],
 );
 
 export const partners = pgTable(
@@ -44,5 +52,9 @@ export const partners = pgTable(
     index("partners_tenant_id_idx").on(table.tenantId),
     uniqueIndex("partners_tenant_slug_unique").on(table.tenantId, table.slug),
     uniqueIndex("partners_tenant_id_id_unique").on(table.tenantId, table.id),
+    check(
+      "partners_slug_format_check",
+      sql`"slug" ~ '^[a-z0-9]+(?:-[a-z0-9]+)*$'`,
+    ),
   ],
 );

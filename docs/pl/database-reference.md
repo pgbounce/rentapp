@@ -45,9 +45,9 @@
 
 ## Ważne kolumny
 
-- `tenants.slug`: globalnie unikalny slug tenanta używany do publicznego rozpoznania po hoście
-- `partners.slug`: unikalny tylko w obrębie jednego tenanta
-- `users.email`: globalnie unikalny e-mail użytkownika wewnętrznego
+- `tenants.slug`: globalnie unikalny slug tenanta zapisany małymi literami i używany do publicznego rozpoznania po hoście
+- `partners.slug`: slug małymi literami, unikalny tylko w obrębie jednego tenanta
+- `users.email`: globalnie unikalny e-mail użytkownika wewnętrznego zapisany w znormalizowanej formie
 - `memberships.scope`: `platform`, `tenant` albo `partner`
 - `memberships.role`: stały profil wewnętrzny
 - `cars.partner_id`: opcjonalne powiązanie auta z partnerem
@@ -105,6 +105,11 @@ Praktyczny sens:
 Przykłady twardej walidacji już w bazie:
 
 - `memberships_scope_check`
+- `tenants_slug_format_check`
+- `partners_slug_format_check`
+- `locations_slug_format_check`
+- `cars_slug_format_check`
+- `users_email_normalized_check`
 - `cars_production_year_check`
 - `cars_seat_count_check`
 - `cars_door_count_check`

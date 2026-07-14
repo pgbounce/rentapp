@@ -45,9 +45,9 @@
 
 ## Important columns
 
-- `tenants.slug`: globally unique tenant slug used by public host resolution
-- `partners.slug`: unique only inside one tenant
-- `users.email`: globally unique internal user email
+- `tenants.slug`: globally unique, lowercase tenant slug used by public host resolution
+- `partners.slug`: lowercase slug unique only inside one tenant
+- `users.email`: globally unique internal user email stored in normalized lowercase form
 - `memberships.scope`: `platform`, `tenant`, or `partner`
 - `memberships.role`: fixed internal profile
 - `cars.partner_id`: optional partner ownership link
@@ -105,6 +105,11 @@ Practical reason:
 Examples of hard validation already in the database:
 
 - `memberships_scope_check`
+- `tenants_slug_format_check`
+- `partners_slug_format_check`
+- `locations_slug_format_check`
+- `cars_slug_format_check`
+- `users_email_normalized_check`
 - `cars_production_year_check`
 - `cars_seat_count_check`
 - `cars_door_count_check`
