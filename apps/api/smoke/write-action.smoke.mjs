@@ -5,6 +5,7 @@ import test from "node:test";
 import { partners, tenants } from "@toprent/db";
 import { createApp } from "../dist/bootstrap/create-app.js";
 import { DbService } from "../dist/infrastructure/db/db.service.js";
+import { RequestContextStore } from "../dist/runtime/request/request-context-store.js";
 
 const adminDatabaseUrl =
   process.env.DATABASE_ADMIN_URL ??
@@ -154,6 +155,7 @@ test("runWriteAction resolves a fresh internal write scope", async (t) => {
     await adminClient.query("commit");
 
     const dbService = app.get(DbService);
+    const requestContextStore = app.get(RequestContextStore);
     const scopeResult = await dbService.runWriteAction(
       {
         userId: activeUserId,
@@ -257,6 +259,16 @@ test("runWriteAction resolves a fresh internal write scope", async (t) => {
     );
 
     assert.equal(insertedPartnerId, platformCreatedPartnerId);
+
+    await assert.rejects(
+      () =>
+        dbService.readTransaction(async (db) => {
+          await db.$client.query("update tenants set name = name where false");
+        }),
+      (error) =>
+        error instanceof Error &&
+        /read[- ]only transaction/i.test(error.message),
+    );
 
     await assert.rejects(
       () =>
@@ -366,6 +378,33 @@ test("runWriteAction resolves a fresh internal write scope", async (t) => {
       (error) =>
         error instanceof Error &&
         /Write invariant failed for "noop partner update"/.test(error.message),
+    );
+
+    await assert.rejects(
+      () =>
+        requestContextStore.run(
+          {
+            requestId: "trusted-user-mismatch",
+            requestMode: "internal",
+            actor: {
+              actorKind: "internal",
+              userId: tenantUserId,
+              role: "tenant",
+              tenantId,
+              partnerId: null,
+            },
+          },
+          () =>
+            dbService.runWriteAction(
+              {
+                userId: activeUserId,
+                targetTenantId: tenantId,
+                targetPartnerId: partnerId,
+              },
+              async () => "unexpected",
+            ),
+        ),
+      (error) => error?.getStatus?.() === 403,
     );
 
     await assert.rejects(

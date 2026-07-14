@@ -36,7 +36,7 @@ flowchart TD
   E --> G
   F --> G
   G --> H{"Read or write?"}
-  H -->|read| I["DbService.transaction()"]
+  H -->|read| I["DbService.readTransaction()"]
   H -->|write| J["DbService.runWriteAction()"]
   I --> K["Set SQL session scope from snapshot"]
   J --> L["Resolve fresh scope from PostgreSQL"]
@@ -48,7 +48,9 @@ flowchart TD
 
 ### Read path
 
-`DbService.transaction()` uses the actor snapshot already stored in request context.
+`DbService.readTransaction()` uses the actor snapshot already stored in request context.
+
+It also opens a PostgreSQL read-only transaction, so this path cannot silently turn into a write path later.
 
 Use it when:
 

@@ -99,6 +99,7 @@ If runtime connected as admin instead of app, the security model would lose its 
 - reads SQL migrations in order
 - replaces `{{app_role}}` with the real runtime role
 - runs each migration in its own transaction
+- fails if any public application table except `app_migrations` ends a migration without both `ENABLE ROW LEVEL SECURITY` and `FORCE ROW LEVEL SECURITY`
 - records applied migration names
 
 ### Why `{{app_role}}` exists

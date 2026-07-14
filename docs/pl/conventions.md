@@ -50,7 +50,8 @@
 - kod weryfikacyjny jest dowodem kontroli nad e-mailem, a nie samą sesją
 - aktorzy `customer` nie używają ról wewnętrznych
 - dostęp do funkcji powinien wynikać z profilu i zakresu, a nie z samego UI
-- read path może używać snapshotu request context bezpośrednio
+- read path może używać snapshotu request context bezpośrednio przez `DbService.readTransaction`
+- `DbService.readTransaction` jest transakcją PostgreSQL tylko do odczytu; zapisy muszą przechodzić przez `DbService.runWriteAction`
 - write path musi używać `DbService.runWriteAction` i świeżego scope rozwiązanego z bazy
 - wejściowe `userId` do `runWriteAction` musi pochodzić wyłącznie z zaufanego auth/session state
 - wejściowe `userId` do `runWriteAction` nigdy nie może pochodzić z body, query params ani kontrolowanych przez użytkownika parametrów trasy

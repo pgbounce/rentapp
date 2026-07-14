@@ -35,6 +35,7 @@ interface ResolveInternalWriteActorRow {
 }
 
 type DbTransactionClient = Parameters<typeof applyDbSessionScope>[0];
+type TransactionMode = "read only" | "read write";
 
 interface MutationResultLike {
   rowCount: number | null;
@@ -75,8 +76,10 @@ export class DbService implements OnModuleDestroy {
     params: ResolveInternalWriteActorParams,
     run: (db: WriteDb) => Promise<T>,
   ) {
+    this.assertRequestActorMatchesWriteUser(params.userId);
+
     return this.withClient((client) =>
-      this.runInTransaction(client, async () => {
+      this.runInTransaction(client, "read write", async () => {
         const scope = await this.resolveLiveWriteScope(client, params);
 
         if (!scope) {
@@ -92,12 +95,12 @@ export class DbService implements OnModuleDestroy {
     );
   }
 
-  async transaction<T>(
+  async readTransaction<T>(
     run: (db: ReturnType<typeof createDb>) => Promise<T>,
     scope = this.readSessionScope(),
   ) {
     return this.withClient((client) =>
-      this.runInTransaction(client, async () => {
+      this.runInTransaction(client, "read only", async () => {
         await applyDbSessionScope(client, scope);
         return run(createDb(client));
       }),
@@ -215,11 +218,25 @@ export class DbService implements OnModuleDestroy {
     );
   }
 
+  private assertRequestActorMatchesWriteUser(userId: string) {
+    const actor = this.readActorSnapshot();
+
+    if (actor.actorKind !== "internal" || actor.userId === userId) {
+      return;
+    }
+
+    throw new ForbiddenException({
+      code: "forbidden",
+      message: "Write access denied",
+    });
+  }
+
   private async runInTransaction<T>(
     client: DbTransactionClient,
+    mode: TransactionMode,
     run: () => Promise<T>,
   ) {
-    await client.query("begin");
+    await client.query(`begin ${mode}`);
 
     try {
       const result = await run();

@@ -36,7 +36,7 @@ flowchart TD
   E --> G
   F --> G
   G --> H{"Odczyt czy zapis?"}
-  H -->|odczyt| I["DbService.transaction()"]
+  H -->|odczyt| I["DbService.readTransaction()"]
   H -->|zapis| J["DbService.runWriteAction()"]
   I --> K["Ustawienie SQL session scope ze snapshotu"]
   J --> L["Świeże rozwiązanie scope z PostgreSQL"]
@@ -48,7 +48,9 @@ flowchart TD
 
 ### Read path
 
-`DbService.transaction()` używa snapshotu aktora, który już siedzi w request context.
+`DbService.readTransaction()` używa snapshotu aktora, który już siedzi w request context.
+
+Ta ścieżka otwiera też transakcję PostgreSQL tylko do odczytu, więc nie może po cichu zamienić się później w ścieżkę zapisu.
 
 Używamy go wtedy, gdy:
 

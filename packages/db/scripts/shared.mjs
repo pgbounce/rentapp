@@ -96,6 +96,41 @@ export async function ensureAdminRoleCanBypassRls(client) {
   );
 }
 
+export async function ensurePublicTablesUseRls(client) {
+  const result = await client.query(`
+    select
+      c.relname as table_name,
+      c.relrowsecurity as row_security_enabled,
+      c.relforcerowsecurity as row_security_forced
+    from pg_class c
+    join pg_namespace n
+      on n.oid = c.relnamespace
+    where n.nspname = 'public'
+      and c.relkind in ('r', 'p')
+      and c.relname <> 'app_migrations'
+      and (
+        not c.relrowsecurity
+        or not c.relforcerowsecurity
+      )
+    order by c.relname asc
+  `);
+
+  if (result.rowCount === 0) {
+    return;
+  }
+
+  const tableList = result.rows
+    .map(
+      (row) =>
+        `${row.table_name} (RLS=${row.row_security_enabled}, FORCE=${row.row_security_forced})`,
+    )
+    .join(", ");
+
+  throw new Error(
+    `Every public application table must enable and force RLS. Found incomplete RLS protection on: ${tableList}`,
+  );
+}
+
 export function readRuntimeRoleConfig() {
   const url = readRuntimeConnectionUrl();
 

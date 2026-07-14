@@ -99,6 +99,7 @@ Gdyby runtime łączył się jako admin zamiast jako app, model bezpieczeństwa 
 - czyta migracje SQL po kolei
 - podmienia `{{app_role}}` na realną nazwę roli runtime
 - uruchamia każdą migrację w osobnej transakcji
+- kończy się błędem, jeśli jakakolwiek publiczna tabela aplikacyjna poza `app_migrations` kończy migrację bez `ENABLE ROW LEVEL SECURITY` i `FORCE ROW LEVEL SECURITY`
 - zapisuje nazwę wykonanej migracji
 
 ### Po co istnieje `{{app_role}}`

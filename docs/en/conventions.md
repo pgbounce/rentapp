@@ -50,7 +50,8 @@
 - the verification code is proof of email control, not the session itself
 - customer actors do not use internal roles
 - access to features should be determined by profile and scope, not by UI alone
-- read path may use snapshot context directly
+- read path may use snapshot context directly through `DbService.readTransaction`
+- `DbService.readTransaction` is a PostgreSQL read-only transaction; writes must go through `DbService.runWriteAction`
 - write path must use `DbService.runWriteAction` and a fresh scope resolved from the database
 - `runWriteAction` input `userId` must come from trusted auth/session state only
 - `runWriteAction` input `userId` must never come from body, query params, or user-controlled route values

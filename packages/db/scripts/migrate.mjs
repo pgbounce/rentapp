@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import pg from "pg";
 import {
   ensureAdminRoleCanBypassRls,
+  ensurePublicTablesUseRls,
   quoteIdentifier,
   readAdminConnectionString,
   readAdminRoleName,
@@ -97,6 +98,7 @@ async function main() {
 
       try {
         await client.query(sql);
+        await ensurePublicTablesUseRls(client);
         await client.query("insert into app_migrations (name) values ($1)", [
           name,
         ]);
@@ -107,6 +109,8 @@ async function main() {
         throw error;
       }
     }
+
+    await ensurePublicTablesUseRls(client);
   } finally {
     await client.end();
   }

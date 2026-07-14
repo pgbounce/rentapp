@@ -62,10 +62,10 @@ Zasady:
 
 ## Read path
 
-`DbService.transaction()`:
+`DbService.readTransaction()`:
 
 - czyta bieżący snapshot aktora z `AsyncLocalStorage`
-- otwiera transakcję DB
+- otwiera transakcję PostgreSQL tylko do odczytu
 - ustawia SQL session scope na podstawie tego snapshotu
 - uruchamia zapytania przez Drizzle
 - robi commit albo rollback
@@ -74,6 +74,7 @@ Używamy go do:
 
 - odczytów
 - lekkich operacji, które nie potrzebują świeżego dowodu uprawnień
+- nigdy do zapisów; PostgreSQL odrzuca zapytania write w tej ścieżce
 
 ## Write path
 
@@ -89,7 +90,8 @@ Używamy go do:
 
 Ważne obecne zasady:
 
-- `runInTransaction()` używa zwykłego `begin`, więc transakcje zapisu działają dziś na domyślnym poziomie izolacji PostgreSQL `READ COMMITTED`
+- `readTransaction()` używa `begin read only`
+- `runWriteAction()` używa `begin read write`, więc transakcje zapisu działają dziś na domyślnym poziomie izolacji PostgreSQL `READ COMMITTED`
 - `runWriteAction()` blokuje podczas dowodu scope tylko `users` i `memberships`
 - `runWriteAction()` nie serializuje zapisów per tenant ani per partner
 - jeśli przyszła funkcja potrzebuje serializacji na poziomie tenanta albo zasobu, musi wziąć własny jawny lock wewnątrz transakcji biznesowej

@@ -62,10 +62,10 @@ Rules:
 
 ## Read path
 
-`DbService.transaction()`:
+`DbService.readTransaction()`:
 
 - reads current actor snapshot from `AsyncLocalStorage`
-- opens a DB transaction
+- opens a PostgreSQL read-only DB transaction
 - sets SQL session scope from that snapshot
 - runs queries through Drizzle
 - commits or rolls back
@@ -74,6 +74,7 @@ Use it for:
 
 - reads
 - lightweight operations that do not need fresh permission proof
+- never for writes; PostgreSQL rejects write queries inside it
 
 ## Write path
 
@@ -89,7 +90,8 @@ Use it for:
 
 Important current rules:
 
-- `runInTransaction()` uses plain `begin`, so write transactions currently run at PostgreSQL's default `READ COMMITTED` isolation level
+- `readTransaction()` uses `begin read only`
+- `runWriteAction()` uses `begin read write`, so write transactions currently run at PostgreSQL's default `READ COMMITTED` isolation level
 - `runWriteAction()` locks only `users` and `memberships` while it proves the actor scope
 - `runWriteAction()` does not serialize writes per tenant or per partner
 - if a future feature needs tenant-level or resource-level serialization, that feature must take its own explicit lock inside the business transaction
