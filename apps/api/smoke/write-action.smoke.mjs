@@ -46,7 +46,7 @@ test("runWriteAction resolves a fresh internal write scope", async (t) => {
     return;
   }
 
-  const { default: pg } = await import("../../../node_modules/pg/lib/index.js");
+  const { default: pg } = await import("pg");
   const { Client } = pg;
   const app = await createApp();
   const adminClient = new Client({ connectionString: adminDatabaseUrl });
