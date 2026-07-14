@@ -1,8 +1,0 @@
-packages:
-  - apps/*
-  - packages/*
-allowBuilds:
-  '@biomejs/biome': true
-  esbuild: true
-  msgpackr-extract: true
-  sharp: true
