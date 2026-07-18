@@ -9,7 +9,7 @@
 | `partners.tenant_id` | `partners` | `uuid` | `tenants.id` | nie | tenantowy | tenant właściciel partnera |
 | `users.id` | `users` | `uuid` | klucz główny | nie | globalny | jeden użytkownik wewnętrzny |
 | `user_credentials.user_id` | `user_credentials` | `uuid` | `users.id` | nie | globalny | wiersz logowania jednego użytkownika |
-| `memberships.id` | `memberships` | `uuid` | klucz główny | nie | globalny | jeden rekord przypisania roli |
+| `memberships.id` | `memberships` | `uuid` | klucz główny | nie | globalny | jedyny wewnętrzny rekord scope danego użytkownika |
 | `memberships.user_id` | `memberships` | `uuid` | `users.id` | nie | globalny | przypisany użytkownik |
 | `memberships.tenant_id` | `memberships` | `uuid` | `tenants.id` | tak | tenantowy | tenant scope przypisania |
 | `memberships.partner_id` | `memberships` | `uuid` | `partners.id` z tym samym `tenant_id` | tak | tenantowy | partner scope przypisania |
@@ -30,7 +30,7 @@
 | `partners` | dostawcy działający wewnątrz jednego tenanta |
 | `users` | użytkownicy wewnętrzni platformy, tenantów i partnerów |
 | `user_credentials` | hashe haseł trzymane osobno od `users` |
-| `memberships` | przypisania profili wewnętrznych według scope |
+| `memberships` | jeden wewnętrzny rekord profilu na jednego użytkownika |
 | `locations` | lokalizacje odbioru i zwrotu w obrębie jednego tenanta |
 | `cars` | auta i ich podstawowe pola opisowe |
 | `car_locations` | mapowanie między autami a lokalizacjami |
@@ -38,6 +38,7 @@
 ## Najważniejsze reguły struktury
 
 - partner zawsze należy do jednego tenanta
+- jeden użytkownik wewnętrzny może mieć tylko jeden wiersz membership
 - partnerowy membership musi mieć jednocześnie `tenant_id` i `partner_id`
 - tenantowy membership musi mieć `tenant_id`, ale bez `partner_id`
 - `car_locations` ma złożony klucz główny, a nie osobne `id`
@@ -48,6 +49,7 @@
 - `tenants.slug`: globalnie unikalny slug tenanta zapisany małymi literami i używany do publicznego rozpoznania po hoście
 - `partners.slug`: slug małymi literami, unikalny tylko w obrębie jednego tenanta
 - `users.email`: globalnie unikalny e-mail użytkownika wewnętrznego zapisany w znormalizowanej formie
+- `memberships.user_id`: unikalny, więc jeden użytkownik wewnętrzny może mieć tylko jeden membership
 - `memberships.scope`: `platform`, `tenant` albo `partner`
 - `memberships.role`: stały profil wewnętrzny
 - `cars.partner_id`: opcjonalne powiązanie auta z partnerem

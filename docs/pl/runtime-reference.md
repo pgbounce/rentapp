@@ -184,6 +184,7 @@ Obecne znaczenie:
 
 - to jest aktor używany przez wewnętrzny dostęp chroniony przez RLS
 - obecne stałe profile wewnętrzne to `platform`, `tenant` i `partner`
+- jeden użytkownik wewnętrzny mapuje się teraz na jeden wiersz membership i jeden profil wewnętrzny
 
 ## Dlaczego `resolve_internal_write_actor` jest ważne
 

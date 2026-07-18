@@ -60,8 +60,6 @@ export const userCredentials = pgTable("user_credentials", {
   ...timestamps(),
 });
 
-// memberships_actor_scope_unique lives in SQL because this Drizzle version
-// cannot express UNIQUE NULLS NOT DISTINCT in the schema builder.
 export const memberships = pgTable(
   "memberships",
   {
@@ -79,7 +77,7 @@ export const memberships = pgTable(
     ...timestamps(),
   },
   (table) => [
-    index("memberships_user_id_idx").on(table.userId),
+    uniqueIndex("memberships_user_id_unique").on(table.userId),
     index("memberships_tenant_id_idx").on(table.tenantId),
     index("memberships_partner_id_idx").on(table.partnerId),
     foreignKey({

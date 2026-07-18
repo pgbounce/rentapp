@@ -12,6 +12,7 @@ Ten projekt ma dziś 4 poziomy pojęciowe: `platform`, `tenant`, `partner` i prz
 - rozpoznaje publiczny kontekst tenanta po subdomenie hosta
 - trzyma izolację dostępu w PostgreSQL RLS
 - rozróżnia `platform`, `tenant` i `partner` jako stałe profile wewnętrzne
+- trzyma jednego użytkownika wewnętrznego przy jednym wierszu membership
 - trzyma `customer` poza wewnętrznymi membershipami
 - rozdziela read path od write path
 

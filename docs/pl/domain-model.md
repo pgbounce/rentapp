@@ -47,7 +47,7 @@ Przykłady:
 - `platform` widzi wszystkie dane i może zrobić wszystko
 - `tenant` widzi i zarządza własną wypożyczalnią
 - `partner` będzie później widział i zarządzał tylko własnymi danymi partner scope wewnątrz tenanta
+- jedno konto wewnętrzne mapuje się na jeden membership
 - tworzenie rekordów partnera domyślnie jest tylko dla `platform`
 - tworzenie partnerowych membershipów domyślnie też jest tylko dla `platform`
 - przyszły przełącznik tenant-level partner management powinien włączać tę możliwość jawnie dla wybranego tenanta
-

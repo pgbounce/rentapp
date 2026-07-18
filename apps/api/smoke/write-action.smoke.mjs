@@ -154,6 +154,15 @@ test("runWriteAction resolves a fresh internal write scope", async (t) => {
     );
     await adminClient.query("commit");
 
+    await assert.rejects(
+      adminClient.query(
+        `insert into memberships (user_id, tenant_id, partner_id, scope, role, status)
+         values ($1, $2, null, 'tenant', 'tenant', 'active')`,
+        [activeUserId, otherTenantId],
+      ),
+      /memberships_user_id_unique|duplicate key/i,
+    );
+
     const dbService = app.get(DbService);
     const requestContextStore = app.get(RequestContextStore);
     const scopeResult = await dbService.runWriteAction(

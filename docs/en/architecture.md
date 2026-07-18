@@ -50,6 +50,7 @@ This keeps the core simple:
 
 - `users` are internal platform, tenant, and partner accounts
 - password hashes live outside `users`, in `user_credentials`
+- one internal user now owns exactly one membership row
 - future rental customers should be modeled separately from internal access
 - a customer is a separate actor, never a `membership` role
 - customer auth should stay separate from internal auth

@@ -12,6 +12,7 @@ Today this project has 4 conceptual levels: `platform`, `tenant`, `partner`, and
 - resolves public tenant context from host subdomain
 - keeps access isolation in PostgreSQL RLS
 - distinguishes `platform`, `tenant`, and `partner` as fixed internal profiles
+- keeps one internal user tied to one membership row
 - keeps `customer` outside internal memberships
 - separates read path from write path
 

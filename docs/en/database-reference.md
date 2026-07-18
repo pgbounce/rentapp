@@ -9,7 +9,7 @@
 | `partners.tenant_id` | `partners` | `uuid` | `tenants.id` | no | tenant | tenant owner of partner |
 | `users.id` | `users` | `uuid` | primary key | no | global | one internal user |
 | `user_credentials.user_id` | `user_credentials` | `uuid` | `users.id` | no | global | login row of one user |
-| `memberships.id` | `memberships` | `uuid` | primary key | no | global | one role assignment row |
+| `memberships.id` | `memberships` | `uuid` | primary key | no | global | the single internal scope row of one user |
 | `memberships.user_id` | `memberships` | `uuid` | `users.id` | no | global | assigned user |
 | `memberships.tenant_id` | `memberships` | `uuid` | `tenants.id` | yes | tenant | tenant scope of assignment |
 | `memberships.partner_id` | `memberships` | `uuid` | `partners.id` with same `tenant_id` | yes | tenant | partner scope of assignment |
@@ -30,7 +30,7 @@
 | `partners` | suppliers working inside one tenant |
 | `users` | internal users of platform, tenants, and partners |
 | `user_credentials` | password hashes stored separately from `users` |
-| `memberships` | internal user profile assignments by scope |
+| `memberships` | one internal profile row per internal user |
 | `locations` | pickup and return locations of one tenant |
 | `cars` | cars and their basic descriptive fields |
 | `car_locations` | mapping between cars and locations |
@@ -38,6 +38,7 @@
 ## Key structural rules
 
 - a partner always belongs to one tenant
+- one internal user may have only one membership row
 - a partner-scope membership must have both `tenant_id` and `partner_id`
 - a tenant-scope membership must have `tenant_id` but no `partner_id`
 - `car_locations` has a composite primary key, not a standalone `id`
@@ -48,6 +49,7 @@
 - `tenants.slug`: globally unique, lowercase tenant slug used by public host resolution
 - `partners.slug`: lowercase slug unique only inside one tenant
 - `users.email`: globally unique internal user email stored in normalized lowercase form
+- `memberships.user_id`: unique, so one internal user can hold only one membership
 - `memberships.scope`: `platform`, `tenant`, or `partner`
 - `memberships.role`: fixed internal profile
 - `cars.partner_id`: optional partner ownership link

@@ -184,6 +184,7 @@ Current meaning:
 
 - this is the actor used by RLS-protected internal access
 - current fixed internal profiles are `platform`, `tenant`, and `partner`
+- one internal user now maps to one membership row and one internal profile
 
 ## Why `resolve_internal_write_actor` matters
 

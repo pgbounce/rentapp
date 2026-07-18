@@ -50,6 +50,7 @@ To utrzymuje core w prostocie:
 
 - `users` to konta wewnętrzne platformy, tenantów i partnerów
 - hashe haseł żyją poza `users`, w `user_credentials`
+- jeden użytkownik wewnętrzny ma teraz dokładnie jeden wiersz membership
 - przyszli klienci wypożyczalni powinni być modelowani osobno od dostępu wewnętrznego
 - `customer` jest osobnym aktorem, nigdy rolą `membership`
 - auth klienta ma być oddzielony od auth wewnętrznego

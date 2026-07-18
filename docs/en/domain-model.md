@@ -47,8 +47,8 @@ Examples:
 - `platform` sees all data and can do everything
 - `tenant` sees and manages its own rental business
 - `partner` will later see and manage only its own partner-scoped data inside a tenant
+- one internal account maps to one membership
 - creating partner records is platform-only by default
 - creating partner-scoped memberships is also platform-only by default
 - a future tenant-level partner management switch should turn this on explicitly for a chosen tenant
-
 
